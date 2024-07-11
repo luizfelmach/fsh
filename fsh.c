@@ -1,54 +1,27 @@
-#include <stdbool.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 
-typedef struct {
-    char *file, *args[10];
-    bool foreground;
-} command;
-
-command command_init();
-
-pid_t process_spawn(command *);
+#include "shell.h"
 
 int main() {
-    command commands[2];
+    shell_init();
 
-    commands[0] = (command){
-        .file = "ls",
-        .args = {"ls", "-la", NULL},
-        .foreground = true,
-    };
-
-    commands[1] = (command){
-        .file = "ps",
-        .args = {"ps", NULL},
-        .foreground = true,
-    };
-
-    process_spawn(commands);
-    process_spawn(commands + 1);
-
-    return 0;
-}
-
-void loop() {
     char *buffer = NULL;
-    size_t bufsize = 32;
+    size_t bufsize;
+    int len;
 
     while (1) {
-        printf("fsh>");
-        getline(&buffer, &bufsize, stdin);
-        buffer[2] = '\0';
-        // process_spawn("pstree");
-    }
-}
+        /* Show prompt */
+        printf("fsh > ");
 
-pid_t process_spawn(command *command) {
-    pid_t pid = fork();
-    if (pid == -1) perror("error");
-    if (pid == 0) {
-        if (execvp(command->file, command->args) == -1) perror("error");
+        len = getline(&buffer, &bufsize, stdin);
+
+        /* Captures the end of line (EOF) */
+        if (len < 0) break;
+
+        /* Remove \n from the last position of the string */
+        buffer[len - 1] = '\0';
     }
-    return pid;
+
+    return 0;
 }
