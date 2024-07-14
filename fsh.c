@@ -1,46 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "process.h"
 #include "shell.h"
 #include "tokens.h"
-#include "utils.h"
+
+#define COMMAND_DELIMITER "#\n"
+#define ARGS_DELIMITER " "
 
 int main(int argc, char **argv) {
-    shell_init();
+    shell_create();
 
     char  *buffer = NULL;
     size_t bufsize;
-    int    len;
 
     while (1) {
-        /* Show prompt */
-        printf("fsh > ");
+        shell_prompt();
+        int len = getline(&buffer, &bufsize, stdin);
 
-        len = getline(&buffer, &bufsize, stdin);
-
-        /* Captures the end of line (EOF) */
+        /* Captures the end of file (EOF) */
         if (len < 0) break;
 
-        /* Remove \n from the last position of the string */
-        buffer[len - 1] = '\0';
+        /* Separate commands by # */
+        Tokens commands     = tokens_create(buffer, COMMAND_DELIMITER);
+        int    commands_len = tokens_size(commands);
 
-        Tokens args     = tokens_create(buffer, " ");
-        int    args_len = tokens_size(args);
+        /* Do nothing if no command was passed */
+        if (commands_len == 0) continue;
 
-        printf("LEN: %d\n", args_len);
-
-        for (int i = 0; i < args_len; i++) {
-            printf("%d - '%s'\n", i, args[i]);
+        /*  Execute 1..N-1 commands in background */
+        for (int i = 1; i < commands_len; i++) {
+            Tokens bg_args = tokens_create(commands[i], ARGS_DELIMITER);
+            shell_execute_bg(bg_args);
         }
 
-        Process *p = process_fg(args);
-        process_spawn(p);
-        process_wait(p);
-        tokens_destroy(args);
+        /* Execute first command in foreground and wait for process */
+        Tokens fg_args = tokens_create(commands[0], ARGS_DELIMITER);
+        shell_execute_fg(fg_args);
     }
 
+    /* Clean up memory */
     free(buffer);
+    shell_destroy();
 
     return 0;
 }

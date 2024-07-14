@@ -52,11 +52,17 @@ void process_spawn(Process *p) {
         exit(1);
     }
 
-    shell_restore_signals();
+    if (p->foreground) {
+        shell_restore_signals();
+    } else {
+        setsid();
+        fork();
+    }
 
     /* If error do not close the shell */
     execvp(p->args[0], p->args);
-    perror("execvp");
+    printf("fsh: command not found: %s\n", p->args[0]);
+    exit(1);
 }
 
 void process_wait(Process *p) {

@@ -4,27 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils.h"
+
+#define TOKENS_MAX 1024
+
 Tokens tokens_create(char *s, char *delimiter) {
-    int s_len       = strlen(s);
-    int n_delimiter = 0;
-    int i           = 0;
+    char **result = calloc(TOKENS_MAX + 1, sizeof(char **));
+    char  *token  = strtok(s, delimiter);
+    int    i      = 0;
 
-    for (i = 0; i < s_len; i++)
-        if (s[i] == *delimiter) n_delimiter += 1;
-
-    char **result = calloc((n_delimiter + 2), sizeof(char **));
-
-    if (n_delimiter == 0) return result;
-
-    /* Set the last position NULL */
-    result[n_delimiter - 1] = NULL;
-
-    char *token = strtok(s, delimiter);
-
-    for (i = 0; i < n_delimiter + 1; i++) {
-        result[i] = strdup(token);
-        token     = strtok(NULL, delimiter);
+    while (token != NULL) {
+        result[i++] = strdup(token);
+        token       = strtok(NULL, delimiter);
     }
+
+    result[i] = NULL;
 
     return result;
 }
