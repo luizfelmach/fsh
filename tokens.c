@@ -4,8 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utils.h"
-
+/*
+ * Define maximum tokens.
+ * Arbitrary number to take away the complexity of allocating the tokens.
+ * If the number of tokens exceeds, it will be bad
+ */
 #define TOKENS_MAX 1024
 
 Tokens tokens_create(char *s, char *delimiter) {
@@ -18,6 +21,10 @@ Tokens tokens_create(char *s, char *delimiter) {
         token       = strtok(NULL, delimiter);
     }
 
+    /*
+     * Set the last token NULL.
+     * This is used to know the size of the tokens
+     */
     result[i] = NULL;
 
     return result;
