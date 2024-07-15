@@ -62,6 +62,9 @@ void shell_execute_bg(Tokens args) {
     process_spawn(p);
 }
 
+void shell_wait_fg() {
+}
+
 void shell_destroy() {
     free(SHELL);
     shell_restore_signals();

@@ -34,9 +34,11 @@ int main(int argc, char **argv) {
             shell_execute_bg(bg_args);
         }
 
-        /* Execute first command in foreground and wait for process */
+        /* Execute first command in foreground */
         Tokens fg_args = tokens_create(commands[0], ARGS_DELIMITER);
         shell_execute_fg(fg_args);
+
+        shell_wait_fg();
     }
 
     /* Clean up memory */
