@@ -1,65 +1,30 @@
 #include "process.h"
 
-#include <fcntl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <wait.h>
-
-#include "shell.h"
-
 struct process {
-    char **args;
+    Tokens args;
     pid_t  pid;
-    bool   running;
-    bool   foreground;
 };
 
-Process *process_create(char **args, bool foreground) {
+Process *process_create(Tokens args) {
     Process *p = malloc(sizeof(Process));
 
-    p->args       = args;
-    p->running    = false;
-    p->pid        = 0;
-    p->foreground = foreground;
-
-    return p;
-}
-
-Process *process_fg(char **args) {
-    Process *p = process_create(args, true);
-    return p;
-}
-
-Process *process_bg(char **args) {
-    Process *p = process_create(args, false);
-    return p;
-}
-
-void process_destroy(Process *p) {
-    free(p);
-}
-
-void process_spawn(Process *p) {
     pid_t pid = fork();
-    p->pid    = pid;
 
-    if (pid > 0) return;
+    p->pid  = pid;
+    p->args = args;
+
+    if (pid > 0) {
+        setpgid(pid, pid);
+        return p;
+    }
 
     if (pid < 0) {
         perror("fork");
         exit(1);
     }
 
-    if (p->foreground) {
-        shell_restore_signals();
-    } else {
-        setsid();
-        fork();
-    }
+    setpgid(getpid(), getpid());
 
-    /* If error do not close the shell */
     execvp(p->args[0], p->args);
     printf("fsh: command not found: %s\n", p->args[0]);
     exit(1);
@@ -68,4 +33,21 @@ void process_spawn(Process *p) {
 void process_wait(Process *p) {
     int status;
     waitpid(p->pid, &status, 0);
+}
+
+void process_setpgid(Process *p, pid_t pid) {
+    setpgid(p->pid, pid);
+}
+
+pid_t process_pid(Process *p) {
+    return p->pid;
+}
+
+Tokens process_args(Process *p) {
+    return p->args;
+}
+
+void process_destroy(Process *p) {
+    tokens_destroy(p->args);
+    free(p);
 }

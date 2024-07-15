@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "process.h"
 #include "shell.h"
 #include "tokens.h"
 
@@ -15,6 +16,8 @@ int main(int argc, char **argv) {
     size_t bufsize;
 
     while (1) {
+        shell_ignore_signals();
+        shell_attach_fg();
         shell_prompt();
         int len = getline(&buffer, &bufsize, stdin);
 
@@ -28,20 +31,27 @@ int main(int argc, char **argv) {
         /* Do nothing if no command was passed */
         if (commands_len == 0) continue;
 
+        shell_restore_signals();
+
         /*  Execute 1..N-1 commands in background */
         for (int i = 1; i < commands_len; i++) {
-            Tokens bg_args = tokens_create(commands[i], ARGS_DELIMITER);
-            shell_execute_bg(bg_args);
+            Tokens   bg_args = tokens_create(commands[i], ARGS_DELIMITER);
+            Process *p       = process_create(bg_args);
         }
 
         /* Execute first command in foreground */
         Tokens fg_args = tokens_create(commands[0], ARGS_DELIMITER);
-        shell_execute_fg(fg_args);
+        // shell_execute_fg(fg_args);
+        Process *fg = process_create(fg_args);
+        shell_send_process_to_fg(fg);
+        process_wait(fg);
 
-        shell_wait_fg();
+        /* Remove zombie processes */
+        // waitpid(-1, NULL, WNOHANG);
+
+        tokens_destroy(commands);
     }
 
-    /* Clean up memory */
     free(buffer);
     shell_destroy();
 

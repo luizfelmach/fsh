@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "process.h"
 
@@ -44,25 +45,18 @@ void shell_restore_signals() {
 
 void shell_create() {
     SHELL = calloc(1, sizeof(Shell));
-    shell_ignore_signals();
 }
 
 void shell_prompt() {
     printf("fsh> ");
 }
 
-void shell_execute_fg(Tokens args) {
-    Process* p = process_fg(args);
-    process_spawn(p);
-    process_wait(p);
+void shell_attach_fg() {
+    tcsetpgrp(STDOUT_FILENO, getpid());
 }
 
-void shell_execute_bg(Tokens args) {
-    Process* p = process_bg(args);
-    process_spawn(p);
-}
-
-void shell_wait_fg() {
+void shell_send_process_to_fg(Process* p) {
+    tcsetpgrp(STDOUT_FILENO, process_pid(p));
 }
 
 void shell_destroy() {
