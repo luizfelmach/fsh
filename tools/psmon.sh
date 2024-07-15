@@ -22,7 +22,7 @@ select pid in "${pids[@]}" "Sair"; do
             ;;
         *)
             if [[ " ${pids[@]} " =~ " $pid " ]]; then
-                watch -d -t -n 0.1 ps --forest -o pid,ppid,pgid,pgrp,sid,wchan,tty,stat,time,cmd -g 405126
+                watch -d -t -n 0.1 ps --forest -o pid,ppid,pgid,pgrp,sid,wchan,tty,stat,time,cmd -g $pid
             else
                 echo "PID inválido. Tente novamente."
             fi
