@@ -12,7 +12,7 @@
 
 typedef struct process Process;
 
-Process *process_create(Tokens args);
+Process *process_create(Tokens args, int bg);
 void     process_wait(Process *p);
 void     process_setpgid(Process *p, pid_t pid);
 pid_t    process_pid(Process *p);

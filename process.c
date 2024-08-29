@@ -5,7 +5,7 @@ struct process {
     pid_t  pid;
 };
 
-Process *process_create(Tokens args) {
+Process *process_create(Tokens args, int bg) {
     Process *p = malloc(sizeof(Process));
 
     pid_t pid = fork();
@@ -22,6 +22,8 @@ Process *process_create(Tokens args) {
         perror("fork");
         exit(1);
     }
+
+    if (bg != 0) fork();
 
     setpgid(getpid(), getpid());
 

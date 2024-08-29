@@ -36,13 +36,12 @@ int main(int argc, char **argv) {
         /*  Execute 1..N-1 commands in background */
         for (int i = 1; i < commands_len; i++) {
             Tokens   bg_args = tokens_create(commands[i], ARGS_DELIMITER);
-            Process *p       = process_create(bg_args);
+            Process *p       = process_create(bg_args, 1);
         }
 
         /* Execute first command in foreground */
-        Tokens fg_args = tokens_create(commands[0], ARGS_DELIMITER);
-        // shell_execute_fg(fg_args);
-        Process *fg = process_create(fg_args);
+        Tokens   fg_args = tokens_create(commands[0], ARGS_DELIMITER);
+        Process *fg      = process_create(fg_args, 0);
         shell_send_process_to_fg(fg);
         process_wait(fg);
 
