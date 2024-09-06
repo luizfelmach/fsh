@@ -3,6 +3,8 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "process.h"
@@ -25,13 +27,34 @@ void sigint_handler(int signum) {
     }
 }
 
+void sigchld_handler(int signum) {
+    int   status;
+    pid_t pid;
+
+    while ((pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0) {
+        printf("sigchld\n");
+
+        if (WIFEXITED(status)) {
+            printf("[Terminated] %d ended with status %d.\n", pid,
+                   WEXITSTATUS(status));
+        } else if (WIFSIGNALED(status)) {
+            printf("[Signal] %d ended due to the signal %d.\n", pid,
+                   WTERMSIG(status));
+        } else if (WIFSTOPPED(status)) {
+            printf("[Stopped] %d stopped %d.\n", pid, WSTOPSIG(status));
+        } else if (WIFCONTINUED(status)) {
+            printf("[Continue] %d continue.\n", pid);
+        }
+    }
+}
+
 void shell_ignore_signals() {
     signal(SIGINT, sigint_handler);
+    signal(SIGCHLD, sigchld_handler);
     signal(SIGQUIT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGTTIN, SIG_IGN);
     signal(SIGTTOU, SIG_IGN);
-    signal(SIGCHLD, SIG_IGN);
 }
 
 void shell_restore_signals() {
@@ -57,6 +80,11 @@ void shell_attach_fg() {
 
 void shell_send_process_to_fg(Process* p) {
     tcsetpgrp(STDOUT_FILENO, process_pid(p));
+}
+
+void shell_add_background(Process* p) {
+    process_setpgid(p, getpid());
+    // int ret = setpgid(process_pid(p), getpid());
 }
 
 void shell_destroy() {

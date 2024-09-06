@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
         for (int i = 1; i < commands_len; i++) {
             Tokens   bg_args = tokens_create(commands[i], ARGS_DELIMITER);
             Process *p       = process_create(bg_args, 1);
+            shell_add_background(p);
         }
 
         /* Execute first command in foreground */
@@ -51,8 +52,14 @@ int main(int argc, char **argv) {
         } else {
             Process *fg = process_create(fg_args, 0);
             shell_send_process_to_fg(fg);
-            process_wait(fg);
         }
+
+        shell_ignore_signals();
+
+        /*
+         * Wait for any signal
+         */
+        pause();
 
         tokens_destroy(commands);
     }
