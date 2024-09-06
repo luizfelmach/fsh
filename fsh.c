@@ -40,13 +40,19 @@ int main(int argc, char **argv) {
         }
 
         /* Execute first command in foreground */
-        Tokens   fg_args = tokens_create(commands[0], ARGS_DELIMITER);
-        Process *fg      = process_create(fg_args, 0);
-        shell_send_process_to_fg(fg);
-        process_wait(fg);
+        Tokens fg_args = tokens_create(commands[0], ARGS_DELIMITER);
 
-        /* Remove zombie processes */
-        // waitpid(-1, NULL, WNOHANG);
+        if (!strcmp(fg_args[0], "waitall")) {
+            printf("waitall\n");
+        } else if (!strcmp(fg_args[0], "die")) {
+            printf("die\n");
+            /* Remove zombie processes */
+            // waitpid(-1, NULL, WNOHANG);
+        } else {
+            Process *fg = process_create(fg_args, 0);
+            shell_send_process_to_fg(fg);
+            process_wait(fg);
+        }
 
         tokens_destroy(commands);
     }
