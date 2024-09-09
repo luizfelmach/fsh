@@ -24,6 +24,9 @@ void shell_add_background(Process *p);
 void shell_add_job(Job *j);
 void shell_wait(Process *p);
 
+void shell_wait_all();
+void shell_die();
+
 void shell_signals();
 void shell_destroy();
 

@@ -163,6 +163,17 @@ void shell_wait(Process* p) {
     }
 }
 
+void shell_wait_all() {
+    while (shell_child_change() != NULL);
+}
+
+void shell_die() {
+    for (List* i = jobs; i != NULL; i = list_next(i)) {
+        job_signal(list_item(i), SIGKILL);
+        job_destroy(list_item(i));
+    }
+}
+
 void shell_destroy() {
     list_destroy(jobs);
 }

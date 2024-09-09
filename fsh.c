@@ -40,6 +40,17 @@ void shell_loop() {
         /* Captures the end of file (EOF) */
         if (nread < 0) break;
 
+        /* Checking shell commands */
+
+        if (strcmp(command, "waitall\n") == 0) {
+            shell_wait_all();
+            continue;
+        }
+        if (strcmp(command, "die\n") == 0) {
+            shell_die();
+            break;
+        }
+
         Job     *job = job_init(command);
         Process *fg  = job_spawn(job);
 
