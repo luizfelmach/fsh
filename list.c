@@ -29,9 +29,10 @@ List *list_push_front(List *l, ListItem item) {
     return node;
 }
 
-void list_destroy(List *l) {
+void list_destroy(List *l, ListItemDestroy destroy_fn) {
     while (l != NULL) {
         List *next = l->next;
+        destroy_fn(l->item);
         free(l);
         l = next;
     }

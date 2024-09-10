@@ -170,10 +170,13 @@ void shell_wait_all() {
 void shell_die() {
     for (List* i = jobs; i != NULL; i = list_next(i)) {
         job_signal(list_item(i), SIGKILL);
-        job_destroy(list_item(i));
     }
 }
 
+/* Cleans out all the nodes from the processes list*/
+void _processes_cleaner(void* process) {}
+
 void shell_destroy() {
-    list_destroy(jobs);
+    list_destroy(jobs, job_destroy_fn);
+    list_destroy(processes, _processes_cleaner);
 }

@@ -45,6 +45,8 @@ Process *job_spawn(Job *j) {
         }
     }
 
+    tokens_destroy(process);
+
     return j->foreground;
 }
 
@@ -89,6 +91,11 @@ void job_destroy(Job *j) {
     for (int i = 0; i < j->bg_size; i++) {
         process_destroy(j->background[i]);
     }
+    process_destroy(j->foreground);
     free(j->command);
     free(j);
+}
+
+void job_destroy_fn(void *j) {
+    job_destroy((Job*) j);
 }

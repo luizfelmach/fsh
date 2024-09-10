@@ -17,5 +17,6 @@ int      job_background_size(Job *j);
 int      job_active(Job *j);
 void     job_signal(Job *j, int sig);
 void     job_destroy(Job *j);
+void     job_destroy_fn(void *j);
 
 #endif

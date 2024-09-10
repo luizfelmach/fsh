@@ -44,10 +44,12 @@ void shell_loop() {
 
         if (strcmp(command, "waitall\n") == 0) {
             shell_wait_all();
+            free(command);
             continue;
         }
         if (strcmp(command, "die\n") == 0) {
             shell_die();
+            free(command);
             break;
         }
 
