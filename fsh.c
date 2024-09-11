@@ -52,6 +52,10 @@ void shell_loop() {
             free(command);
             break;
         }
+        if (strcmp(command, "\n") == 0) {
+            free(command);
+            continue;
+        }
 
         Job     *job = job_init(command);
         Process *fg  = job_spawn(job);
