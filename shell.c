@@ -163,6 +163,26 @@ void shell_wait(Process* p) {
     }
 }
 
+int is_internal_op(char *command) {
+    if (strcmp(command, "waitall\n") == 0) return 1;
+    if (strcmp(command, "die\n") == 0) return 1;
+    return 0;
+}
+
+int shell_internal_op(char *command) {
+    int break_flag = 0;
+
+    if (strcmp(command, "waitall\n") == 0) {
+        shell_wait_all();
+    }
+    if (strcmp(command, "die\n") == 0) {
+        shell_die();
+        break_flag = 1;
+    }
+
+    return break_flag;
+}
+
 void shell_wait_all() {
     while (shell_child_change() != NULL);
 }
@@ -173,7 +193,8 @@ void shell_die() {
     }
 }
 
-/* Cleans out all the nodes from the processes list*/
+/*  Cleans out all the nodes from the processes list
+    (Once all processes are already destroyed)      */
 void _processes_cleaner(void* process) {}
 
 void shell_destroy() {

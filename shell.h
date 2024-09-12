@@ -27,6 +27,9 @@ void shell_wait(Process *p);
 void shell_wait_all();
 void shell_die();
 
+int is_internal_op(char *command);
+int shell_internal_op(char *command);
+
 void shell_signals();
 void shell_destroy();
 

@@ -40,20 +40,21 @@ void shell_loop() {
         /* Captures the end of file (EOF) */
         if (nread < 0) break;
 
-        /* Checking shell commands */
-
-        if (strcmp(command, "waitall\n") == 0) {
-            shell_wait_all();
+        /* Checks for empty command */
+        if (strcmp(command, "\n") == 0) {
             free(command);
             continue;
         }
-        if (strcmp(command, "die\n") == 0) {
-            shell_die();
+
+        /* Checking shell commands */
+
+        if (is_internal_op(command)) {
+            int flag_break;
+            
+            flag_break = shell_internal_op(command);
             free(command);
-            break;
-        }
-        if (strcmp(command, "\n") == 0) {
-            free(command);
+            
+            if (flag_break) break;
             continue;
         }
 
